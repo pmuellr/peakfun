@@ -1,0 +1,38 @@
+{
+  "name": "peakfun",
+  "version": "1.0.0",
+  "description": "get a peek at your functions",
+  "license": "MIT",
+  "author": "Patrick Mueller <pmuellr@apache.org> (https://github.com/pmuellr)",
+  "homepage": "https://github.com/pmuellr/peakfun",
+  "main": "peakfun.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pmuellr/peakfun.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pmuellr/peakfun/issues"
+  },
+  "scripts": {
+    "standard": "echo 'running standard' && standard -v",
+    "test": "npm -s run standard && npm -s run utest",
+    "utest": "node test/index.js | FORCE_COLOR=1 tap-spec",
+    "watch": "nodemon --exec 'npm run -s test'"
+  },
+  "standard": {
+    "ignore": [
+      "/tmp/",
+      "/node_modules/"
+    ]
+  },
+  "dependencies": {
+    "mkdirp": "~0.5.1",
+    "userhome": "~1.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "~1.11.0",
+    "standard": "~10.0.0",
+    "tap-spec": "~4.1.1",
+    "tape": "~4.6.0"
+  }
+}

@@ -1,17 +1,17 @@
 'use strict'
 
-const fs = require('fs')
-const path = require('path')
 const modModule = require('module')
 
 const mkdirp = require('mkdirp')
 const userhome = require('userhome')
 
-const functions = require('./lib/functions')
 const tracer = require('./lib/tracer')
+const functions = require('./lib/functions')
+const LogStream = require('./lib/log-stream')
 
 // original require('module').prototype.load
 let ModuleLoadOriginal
+const Logger = require('./lib/logger').getLogger()
 
 // get all the things set up
 function main () {
@@ -37,18 +37,11 @@ function main () {
     return
   }
 
-  const date = new Date()
-    .toISOString()
-    .substr(0, 19)
-    .replace('T', '_')
-    .replace(/:/g, '-')
+  const logStream = LogStream.create(logsDir)
 
-  const logFile = path.join(logsDir, `${date}.json`)
-  const logStream = fs.createWriteStream(logFile)
-  // process.on('exit', (code) => logStream.close())
-
-  console.log(`writing peakfun log to ${logFile}`)
+  Logger.log(`writing peakfun log to ${logStream.getFileName()}`)
   tracer.setLogStream(logStream)
+  functions.setLogStream(logStream)
 
   ModuleLoadOriginal = modModule.prototype.load
   modModule.prototype.load = moduleLoadShim
@@ -58,11 +51,11 @@ function main () {
 function moduleLoadShim (fileName) {
   const result = ModuleLoadOriginal.call(this, fileName)
 
-  console.log(`processing module: ${this.id}`)
+  Logger.debug(`processing ${this.id}`)
   try {
     functions.addFromModuleExports(this, this.exports)
   } catch (err) {
-    console.log(`error processing module: ${this.id}:`, err)
+    Logger.log(`error processing module: ${this.id}:`, err)
   }
 
   return result
@@ -70,7 +63,7 @@ function moduleLoadShim (fileName) {
 
 // log a message that we can't run
 function logNope (message) {
-  console.log(`${message}, no peeking at your functions`)
+  Logger.log(`${message}, no peeking at your functions`)
 }
 
 // call the main function
